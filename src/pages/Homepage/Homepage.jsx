@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Header } from "../../components/moleculas";
-import { Wrapper } from "../../components/atoms";
+import { SpinnerLoading, Wrapper } from "../../components/atoms";
 
 const App = () => {
   //STATE
@@ -15,6 +15,7 @@ const App = () => {
   const [price, setPrice] = useState("");
   const [total, setTotal] = useState(0);
   const [barang, setBarang] = useState("");
+  const [loading, setLoading] = useState(true);
 
   //FUNCTIONAL
   const fetchCountries = async () => {
@@ -55,10 +56,19 @@ const App = () => {
     fetchCountries();
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer); // Membersihkan timer saat komponen tidak digunakan lagi
+  }, []);
+
   //COMPONENT
   return (
     <>
       <Header />
+      {loading ? <SpinnerLoading /> : null}
       <Wrapper>
         <div className="w-full pl-32 pr-32 pb-20">
           <div className="pt-20">
