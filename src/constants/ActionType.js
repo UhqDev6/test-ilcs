@@ -1,0 +1,7 @@
+const ActionType = {
+  RECEIVE_COUNTRY: "RECEIVE_COUNTRY",
+  RECEIVE_PORT: "RECEIVE_PORT",
+  RECEIVE_PRODUCT: "RECEIVE_PRODUCT",
+};
+
+export { ActionType };

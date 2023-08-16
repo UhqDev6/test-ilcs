@@ -1,67 +1,46 @@
-import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import { Header } from "../../components/moleculas";
 import { SpinnerLoading, Wrapper } from "../../components/atoms";
+import { useDispatch, useSelector } from "react-redux";
+import { asyncCountry } from "../../states/negara/action";
+import { asyncPort } from "../../states/pelabuhan/action";
+import { asyncProduct } from "../../states/product/action";
 
 const App = () => {
   //STATE
-  const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const [ports, setPorts] = useState([]);
   const [selectedPort, setSelectedPort] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const [discount, setDiscount] = useState(0);
   const [price, setPrice] = useState("");
   const [total, setTotal] = useState(0);
   const [barang, setBarang] = useState("");
   const [loading, setLoading] = useState(true);
 
-  //FUNCTIONAL
-  const fetchCountries = async () => {
-    try {
-      const response = await axios.get(
-        `https://insw-dev.ilcs.co.id/n/negara?ur_negara=SIN`
-      );
-      setCountries(response.data);
-    } catch (error) {
-      console.error("Error fetching countries:", error);
-    }
-  };
-
-  const fetchPorts = async (countryId, urPelabuhan) => {
-    try {
-      const response = await axios.get(
-        `https://insw-dev.ilcs.co.id/my/n/pelabuhan?kd_negara=${countryId}&ur_pelabuhan=${urPelabuhan}`
-      );
-      setPorts(response.data);
-    } catch (error) {
-      console.error("Error fetching ports:", error);
-    }
-  };
-
-  const fetchProducts = async (hsCode) => {
-    try {
-      const response = await axios.get(
-        `https://insw-dev.ilcs.co.id/my/n/barang?hs_code=${hsCode}`
-      );
-      setProducts(response.data);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
-  };
+  //STATE
+  const {
+    country = [],
+    port = [],
+    product = {},
+  } = useSelector((states) => states);
+  const dispatch = useDispatch();
+  console.log("product", product);
 
   //EFFECT
   useEffect(() => {
-    fetchCountries();
-  }, []);
+    // MENGGUNAKAN HARD DATA KARNA API COUNTRY BERMASALAH
+    // dispatch(asyncCountry(selectedCountry));
+    dispatch(asyncCountry("SIN"));
+    // dispatch(asyncPort(selectedPort));
+    dispatch(asyncPort("SG", "jur"));
+    dispatch(asyncProduct(10079000));
+  }, [dispatch, selectedCountry, selectedPort]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
 
-    return () => clearTimeout(timer); // Membersihkan timer saat komponen tidak digunakan lagi
+    return () => clearTimeout(timer);
   }, []);
 
   //COMPONENT
@@ -81,13 +60,12 @@ const App = () => {
               value={selectedCountry}
               onChange={(e) => {
                 setSelectedCountry(e.target.value);
-                fetchPorts(e.target.value);
               }}
             >
               <option value="">Pilih Negara</option>
-              {countries.map((country) => (
-                <option key={country.id} value={country.id}>
-                  {country.negara}
+              {country?.data?.map((countries) => (
+                <option key={countries?.id} value={countries?.id}>
+                  {countries?.negara}
                 </option>
               ))}
             </select>
@@ -102,13 +80,15 @@ const App = () => {
               value={selectedPort}
               onChange={(e) => {
                 setSelectedPort(e.target.value);
-                fetchProducts(e.target.value);
               }}
             >
               <option value="">Pilih Pelabuhan</option>
-              {ports.map((port) => (
-                <option key={port.id} value={port.id}>
-                  {port.name}
+              {port?.data?.map((portItem) => (
+                <option
+                  key={portItem?.kd_pelabuhan}
+                  value={portItem?.kd_pelabuhan}
+                >
+                  {portItem?.ur_pelabuhan}
                 </option>
               ))}
             </select>
@@ -126,7 +106,12 @@ const App = () => {
             />
           </div>
           <div className="mt-4">
-            <textarea class="resize-none border rounded-md p-2 w-full h-40 focus:outline-none focus:ring focus:border-blue-300"></textarea>
+            <textarea className="resize-none border rounded-md p-2 w-full h-40 focus:outline-none focus:ring focus:border-blue-300">
+              {product?.data?.map(
+                (productItem) =>
+                  productItem?.sub_header + "-" + productItem?.uraian_id
+              )}
+            </textarea>
           </div>
           <div className="mt-4">
             <label htmlFor="discount" className="block font-bold mb-1">
